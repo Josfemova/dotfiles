@@ -25,14 +25,22 @@
 # SOFTWARE.
 
 from typing import List  # noqa: F401
-
-from libqtile import bar, layout, widget
+import subprocess
+import socket
+import os
+from libqtile import bar, layout, widget, hook
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
 
 mod = "mod4"
-terminal = guess_terminal()
+alt = "mod1"
+cntrlR="Control_R"
+cntrlL="Control_L"
+pgdn="Page_Down"
+pgup="Page_Up"
+space="sapce"
+terminal = 'konsole'
 
 keys = [
     # Switch between windows
@@ -80,67 +88,192 @@ keys = [
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
     Key([mod], "r", lazy.spawncmd(),
         desc="Spawn a command using a prompt widget"),
+    Key([alt],"Shift_L",lazy.widget["keyboardlayout"].next_keyboard(),desc="next kbd layout"),
+    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl -s set +5%")),
+    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl -s set 5%-")),
+    Key([alt], "XF86AudioRaiseVolume", lazy.spawn("brightnessctl -s set +5%")),
+    Key([alt], "XF86AudioLowerVolume", lazy.spawn("brightnessctl -s set 5%-")),
+    Key([], "XF86AudioMute", lazy.spawn("/usr/bin/pulseaudio-ctl mute")),
+    Key([], "XF86AudioRaiseVolume", lazy.spawn("/usr/bin/pulseaudio-ctl up")),
+    Key([], "XF86AudioLowerVolume", lazy.spawn("/usr/bin/pulseaudio-ctl down")),
+    Key(["control"], pgdn,lazy.next_screen(),desc='Move focus to next monitor'),
+    Key(["control"], pgup,lazy.prev_screen(), desc='Move focus to prev monitor'),
 ]
 
-groups = [Group(i) for i in "123456789"]
+group_names = [("1: Mail", {'layout': 'monadwide', 'spawn':"thunderbird"}),
+               ("2: Comfy", {'layout': 'monadtall'}),
+               ("3: Comfy", {'layout': 'monadwide'}),
+               ("4: vim", {'layout': 'monadtall'}),
+               ("5: Notes", {'layout': 'columns'}),
+               ("6: Media", {'layout': 'columns'}),
+               ("7: Editing", {'layout': 'columns'}),
+               ("8: zoom/teams/discord", {'layout': 'max'}),
+               ("9: VM's", {'layout': 'max'})]
 
-for i in groups:
-    keys.extend([
-        # mod1 + letter of group = switch to group
-        Key([mod], i.name, lazy.group[i.name].toscreen(),
-            desc="Switch to group {}".format(i.name)),
+groups = [Group(name, **kwargs) for name, kwargs in group_names]
 
-        # mod1 + shift + letter of group = switch to & move focused window to group
-        Key([mod, "shift"], i.name, lazy.window.togroup(i.name, switch_group=True),
-            desc="Switch to & move focused window to group {}".format(i.name)),
-        # Or, use below if you prefer not to switch to that group.
-        # # mod1 + shift + letter of group = move focused window to group
-        # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
-        #     desc="move focused window to group {}".format(i.name)),
-    ])
-
+for i, (name, kwargs) in enumerate(group_names, 1):
+    keys.append(Key([mod], str(i), lazy.group[name].toscreen()))       # Switch to another group
+    keys.append(Key([mod, "shift"], str(i), lazy.window.togroup(name, switch_group=True)))
+  
+stdmargin = 15
 layouts = [
-    layout.Columns(border_focus_stack='#d75f5f'),
-    layout.Max(),
+    layout.Columns(border_focus_stack='#d75f5f',margin=stdmargin),
+    layout.Max(margin=stdmargin),
     # Try more layouts by unleashing below layouts.
     # layout.Stack(num_stacks=2),
-     layout.Bsp(),
-     layout.Matrix(),
-     layout.MonadTall(),
-     layout.MonadWide(),
-     layout.RatioTile(),
-     layout.Tile(),
-     layout.TreeTab(),
-     layout.VerticalTile(),
-     layout.Zoomy(),
+    #layout.Bsp(margin=stdmargin),
+    layout.Matrix(margin=stdmargin),
+    layout.MonadTall(margin=stdmargin),
+    layout.MonadWide(margin=stdmargin),
+    #layout.RatioTile(margin=stdmargin),
+    #layout.Tile(margin=stdmargin),
+    #layout.TreeTab(margin=stdmargin),
+    #layout.VerticalTile(margin=stdmargin),
+    #layout.Zoomy(margin=stdmargin),
 ]
 
+
+floating_layout = layout.Floating()
+
+# vim: tabstop=4 shiftwidth=4 expandtab
+@hook.subscribe.client_new
+def floating_dialogs(w):
+    dialog = w.window.get_wm_type() == 'dialog'
+    transient = w.window.get_wm_transient_for()
+    if dialog or transient:
+        window.floating = True
+    else:
+        namex = w.window.get_name()
+        if('kuake' in namex):
+            w.floating=True
+        elif ('scord' in namex):
+            w.floating=True
+
+
+
+
+
+gruvbox = {
+	"fg"	:["#fbf1c7","#ebdbb2","#d5c4a1","#bdae93","#a89984"],
+	"bg"	:["#282828","#3c3836","#504945","#665c54","#7c6f64","#1d2021","#32302f"],
+	"colors":{
+		"red"	:["#cc241d","#fb4934"],
+		"green"	:["#98971a","#b8bb26"],
+		"yellow":["#d79921","#fabd2f"],
+		"blue"	:["#458588","#83a598"],
+		"purple":["#b16286","#d3869b"],
+		"aqua"	:["#689d6a","#8ec07c"],
+		"grey"	:["#a89984","#928374"],
+		"orange":["#d65d0e","#fe8019"]
+	}
+}
+
 widget_defaults = dict(
-    font='sans',
-    fontsize=12,
+    font='agave nerd font',
+    fontsize=15,
     padding=3,
+	background = gruvbox["bg"][0], 
+	foreground = gruvbox["fg"][1], 
+	inactive = gruvbox["fg"][4],
+	active = gruvbox["fg"][0], 
+	size_percent = 50
 )
 extension_defaults = widget_defaults.copy()
-
 screens = [
     Screen(
+        wallpaper='/home/josfemova/Pictures/wallpapers/pixel2.jpg',
+        wallpaper_mode='fill',
         bottom=bar.Bar(
             [
-                widget.CurrentLayout(),
+                widget.CurrentLayout(background=gruvbox["bg"][2]),
+                widget.TextBox(text='>',background = gruvbox["bg"][2]),
+                widget.TextBox(text='Battery:',background=gruvbox["bg"][1]),
+				widget.Battery(
+					background = gruvbox["bg"][1],
+                    foreground=gruvbox["colors"]["green"][0],
+                    low_foreground=gruvbox["colors"]["red"][0],
+                    low_percentage=0.3),
+                widget.TextBox(text='>',background = gruvbox["bg"][1]),
+				widget.TextBox(text='brightness:', background= gruvbox["bg"][2]),
+                widget.Backlight(
+					background=gruvbox["bg"][2],
+					backlight_name='intel_backlight',change_command='brightnessctl s {0}',
+					foreground= gruvbox["colors"]["blue"][1]
+				),
+                widget.TextBox(text='>',background = gruvbox["bg"][2]),
+                widget.CurrentScreen(),
+                widget.KeyboardLayout(configured_keyboards=['us','latam']),
                 widget.GroupBox(),
                 widget.Prompt(),
-                widget.WindowName(),
+                #widget.WindowName(),
                 widget.Chord(
                     chords_colors={
                         'launch': ("#ff0000", "#ffffff"),
                     },
                     name_transform=lambda name: name.upper(),
                 ),
-                widget.TextBox("default config", name="default"),
-                widget.TextBox("Press &lt;M-r&gt; to spawn", foreground="#d75f5f"),
                 widget.Systray(),
-                widget.Clock(format='%Y-%m-%d %a %I:%M %p'),
-                widget.QuickExit(),
+				widget.Spacer(background=gruvbox["bg"][0]),
+                widget.Clock(
+                    format='%a %d/%m/%y %I:%M %p'),
+                widget.QuickExit(foreground = gruvbox["colors"]["red"][0]),
+                widget.Wlan(interface="wlp2s0"),
+                widget.Volume(
+                    step=5,
+                    volume_app='pacmixer',
+                    volume_down_command='/usr/bin/pulseaudio-ctl down',
+                    volume_up_command='/usr/bin/pulseaudio-ctl up',
+                    mute_commad='/usr/bin/pulseaudio-ctl mute',
+                ), 
+            ],
+            24,
+        ),
+    ),Screen(
+        wallpaper='/home/josfemova/Pictures/wallpapers/pixel2.jpg',
+        wallpaper_mode='fill',
+        bottom=bar.Bar(
+            [
+                widget.CurrentLayout(background=gruvbox["bg"][2]),
+                widget.TextBox(text='>',background = gruvbox["bg"][2]),
+                widget.TextBox(text='Battery:',background=gruvbox["bg"][1]),
+				widget.Battery(
+					background = gruvbox["bg"][1],
+                    foreground=gruvbox["colors"]["green"][0],
+                    low_foreground=gruvbox["colors"]["red"][0],
+                    low_percentage=0.3),
+                widget.TextBox(text='>',background = gruvbox["bg"][1]),
+				widget.TextBox(text='brightness:', background= gruvbox["bg"][2]),
+                widget.Backlight(
+					background=gruvbox["bg"][2],
+					backlight_name='intel_backlight',change_command='brightnessctl s {0}',
+					foreground= gruvbox["colors"]["blue"][1]
+				),
+                widget.TextBox(text='>',background = gruvbox["bg"][2]),
+                widget.CurrentScreen(),
+                widget.KeyboardLayout(configured_keyboards=['us','latam']),
+                widget.GroupBox(),
+                widget.Prompt(),
+                #widget.WindowName(),
+                widget.Sep(background = gruvbox["bg"][2]),
+                widget.Chord(
+                    chords_colors={
+                        'launch': ("#ff0000", "#ffffff"),
+                    },
+                    name_transform=lambda name: name.upper(),
+                ),
+				widget.Spacer(background=gruvbox["bg"][0]),
+                widget.Clock(
+                    format='%d-%m-%Y %a %I:%M %p'),
+                widget.QuickExit(foreground = gruvbox["colors"]["red"][0]),
+                widget.Wlan(interface="wlp2s0"),
+                widget.Volume(
+                    step=5,
+                    volume_app='pacmixer',
+                    volume_down_command='/usr/bin/pulseaudio-ctl down',
+                    volume_up_command='/usr/bin/pulseaudio-ctl up',
+                    mute_commad='/usr/bin/pulseaudio-ctl mute',
+                ), 
             ],
             24,
         ),
@@ -167,7 +300,7 @@ floating_layout = layout.Floating(float_rules=[
     *layout.Floating.default_float_rules,
     Match(wm_class='confirmreset'),  # gitk
     Match(wm_class='makebranch'),  # gitk
-    Match(wm_class='maketag'),  # gitk
+    Match(wm_class='maketag'),  # gitk         Key([mod], "period",              lazy.next_screen(),              desc='Move focus to next monitor'              ),          Key([mod], "comma",              lazy.prev_screen(),              desc='Move focus to prev monitor'              ),
     Match(wm_class='ssh-askpass'),  # ssh-askpass
     Match(title='branchdialog'),  # gitk
     Match(title='pinentry'),  # GPG key password entry
@@ -184,3 +317,13 @@ focus_on_window_activation = "smart"
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
 wmname = "LG3D"
+
+
+
+
+@hook.subscribe.startup_once
+def start_once():
+	processes = [
+		['setxkbmap', '-option', 'caps:escape'],['picom'],['yakuake']]
+	for p in processes:
+		subprocess.Popen(p)

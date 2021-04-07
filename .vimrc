@@ -11,6 +11,9 @@ nmap Q <Nop>
 set mouse+=a
 set tabstop=4
 set autoindent
+"set smartindent 
+set clipboard=unnamedplus
 set encoding=utf-8
 set langmenu=es_ES.UTF-8
 syntax on
+
