@@ -1,3 +1,7 @@
 [user]
 	email = josfemova@gmail.com
 	name = josfemova
+[pull]
+	rebase = false
+[credential]
+	helper = store
