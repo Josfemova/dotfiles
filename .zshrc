@@ -14,21 +14,7 @@ export EDITOR=vim
 export PAGER=less
 export RANGER_LOAD_DEFAULT_RC=FALSE
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-#export RUSTC=$RUST_XTENSA/build/x86_64-unknown-linux-gnu/stage2/bin/rustc
-#export RUSTDOC=$RUST_XTENSA/build/x86_64-unknown-linux-gnu/stage2/bin/rustdoc
-#export XARGO_RUST_SRC=$RUST_XTENSA/library
-
-#export RUST_COMPILER_RT_ROOT=$RUST_XTENSA/src/llvm-project/compiler-rt
 export PATH=~/.local/bin:"$PATH"
-
-export PATH=/opt/android-sdk:"$PATH"
-export ANDROID_SDK_ROOT=/opt/android-sdk
-
-export ZEPHYR_TOOLCHAIN_VARIANT="espressif"
-export ESPRESSIF_TOOLCHAIN_PATH="${HOME}/.espressif/tools/zephyr"
-export PATH=/home/josfemova/.espressif/tools/xtensa-esp32-elf/esp-2021r2-8.4.0/xtensa-esp32-elf/bin:"$PATH"
-export PATH=/home/josfemova/.espressif/tools/xtensa-lx106-elf/bin:"$PATH$"
-export PICO_SDK_PATH=/usr/share/pico-sdk
 
 alias status='git status & git fetch'
 alias commit='git commit -a -m'
@@ -36,27 +22,16 @@ alias push='git push'
 alias pull='git pull'
 alias code='vscodium'
 alias qconfig='vim ~/.config/qtile/config.py'
-alias solvedir='cd ~/Desktop/Electro/activos/octave'
 alias rec='cat ~/recordatorios'
 alias recu='vim ~/recordatorios'
 alias libros='ranger ~/Desktop/Libros'
 alias vpnmit='sudo openvpn --config ~/client.ovpn'
 alias gpumit='ssh josfemova@gpu.psfc.mit.edu'
 
-#useful scripts
-alias yt='~/UsefulScripts/yt'
-alias xtensatime='source ~/UsefulScripts/xtensatime.sh'
-alias suwupawmansuw='sudo pacman -Syu'
-alias solve='~/REPOSITORIOS/solve/target/release/solve -i'
-alias gdb-arm="arm-none-eabi-gdb"
-
-export ESP_IDF=/opt/esp-idf
-export ESPIDF=/opt/esp-idf
+alias get_idf='. $HOME/esp/esp-idf/export.sh'
 
 powerline-daemon -q
 . /usr/share/powerline/bindings/zsh/powerline.zsh
-
-
 
 
 # >>> conda initialize >>>

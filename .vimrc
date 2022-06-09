@@ -1,3 +1,4 @@
+set cc=80
 set nocompatible
 set shortmess+=I
 set number
