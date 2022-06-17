@@ -14,7 +14,9 @@ export EDITOR=vim
 export PAGER=less
 export RANGER_LOAD_DEFAULT_RC=FALSE
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-export PATH=~/.local/bin:"$PATH"
+export PATH="~/.local/bin:$PATH"
+export PATH="$HOME/Andestech/AndeSight_STD_v510/ide/:$PATH"
+
 
 alias status='git status & git fetch'
 alias commit='git commit -a -m'
@@ -27,23 +29,27 @@ alias recu='vim ~/recordatorios'
 alias libros='ranger ~/Desktop/Libros'
 alias vpnmit='sudo openvpn --config ~/client.ovpn'
 alias gpumit='ssh josfemova@gpu.psfc.mit.edu'
-
 alias get_idf='. $HOME/esp/esp-idf/export.sh'
+
 
 powerline-daemon -q
 . /usr/share/powerline/bindings/zsh/powerline.zsh
 
 
+# Rapid Silicon
+alias vpnrs='sudo netExtender -u jmorales -d "arbutussystems.net" vpn.asigrid.com'
+
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/josfemova/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('/home/josfemova-rs/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/home/josfemova/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/josfemova/miniconda3/etc/profile.d/conda.sh"
+    if [ -f "/home/josfemova-rs/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/josfemova-rs/miniconda3/etc/profile.d/conda.sh"
     else
-        export PATH="/home/josfemova/miniconda3/bin:$PATH"
+        export PATH="/home/josfemova-rs/miniconda3/bin:$PATH"
     fi
 fi
 unset __conda_setup

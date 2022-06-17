@@ -28,7 +28,7 @@ from typing import List  # noqa: F401
 import subprocess
 import socket
 import os
-from libqtile import bar, layout, widget, hook
+from libqtile import bar, layout, widget, hook, extension
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
@@ -43,6 +43,15 @@ space="sapce"
 terminal = 'konsole'
 
 keys = [
+    Key([mod], 'p', lazy.run_extension(extension.DmenuRun(
+        dmenu_prompt=">",
+        dmenu_font="Andika-8",
+        fontsize=16,
+        background="#15181a",
+        foreground="#00ff00",
+        selected_background="#079822",
+        selected_foreground="#fff",
+    ))),
     # Switch between windows
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
     Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
@@ -71,7 +80,7 @@ keys = [
         desc="Grow window down"),
     Key([mod, "control"], "k", lazy.layout.grow_up(), desc="Grow window up"),
     Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
-
+    Key([mod], "f", lazy.window.toggle_floating()),
     # Toggle between split and unsplit sides of stack.
     # Split = all windows displayed
     # Unsplit = 1 window displayed, like Max layout, but still with
@@ -102,30 +111,44 @@ keys = [
 
 group_names = [("1: Mail", {'layout': 'monadwide', 'spawn':"thunderbird"}),
                ("2: Comfy", {'layout': 'monadtall'}),
-               ("3: Comfy", {'layout': 'monadwide'}),
-               ("4: vim", {'layout': 'monadtall'}),
-               ("5: Notes", {'layout': 'columns'}),
-               ("6: Media", {'layout': 'columns'}),
-               ("7: Editing", {'layout': 'columns'}),
-               ("8: zoom/teams/discord", {'layout': 'max'}),
-               ("9: VM's", {'layout': 'max'})]
+               ("3: comfy", {'layout': 'monadwide'}),
+               ("4: telegram", {'layout': 'monadtall'}),
+               ("5: teams", {'layout': 'max', 'spawn': "teams"})]
 
 groups = [Group(name, **kwargs) for name, kwargs in group_names]
 
 for i, (name, kwargs) in enumerate(group_names, 1):
     keys.append(Key([mod], str(i), lazy.group[name].toscreen()))       # Switch to another group
     keys.append(Key([mod, "shift"], str(i), lazy.window.togroup(name, switch_group=True)))
+
+gruvbox = {
+	"fg"	:["#fbf1c7","#ebdbb2","#d5c4a1","#bdae93","#a89984"],
+	"bg"	:["#282828","#3c3836","#504945","#665c54","#7c6f64","#1d2021","#32302f"],
+	"colors":{
+		"red"	:["#cc241d","#fb4934"],
+		"green"	:["#98971a","#b8bb26"],
+		"yellow":["#d79921","#fabd2f"],
+		"blue"	:["#458588","#83a598"],
+		"purple":["#b16286","#d3869b"],
+		"aqua"	:["#689d6a","#8ec07c"],
+		"grey"	:["#a89984","#928374"],
+		"orange":["#d65d0e","#fe8019"]
+	},
+    "custom": {
+            "border_focus": '#ff00b3'
+    }
+}
   
 stdmargin = 15
 layouts = [
-    layout.Columns(border_focus_stack='#d75f5f',margin=stdmargin),
+    layout.Columns(border_focus_stack=gruvbox['custom']['border_focus'],margin=stdmargin),
     layout.Max(margin=stdmargin),
     # Try more layouts by unleashing below layouts.
     # layout.Stack(num_stacks=2),
     #layout.Bsp(margin=stdmargin),
-    layout.Matrix(margin=stdmargin),
-    layout.MonadTall(margin=stdmargin),
-    layout.MonadWide(margin=stdmargin),
+    layout.Matrix(border_focus=gruvbox['custom']['border_focus'],margin=stdmargin),
+    layout.MonadTall(border_focus=gruvbox['custom']['border_focus'],margin=stdmargin),
+    layout.MonadWide(border_focus=gruvbox['custom']['border_focus'],margin=stdmargin),
     #layout.RatioTile(margin=stdmargin),
     #layout.Tile(margin=stdmargin),
     #layout.TreeTab(margin=stdmargin),
@@ -142,7 +165,7 @@ def floating_dialogs(w):
     dialog = w.window.get_wm_type() == 'dialog'
     transient = w.window.get_wm_transient_for()
     if dialog or transient:
-        window.floating = True
+        w.window.floating = True
     else:
         namex = w.window.get_name()
         if('kuake' in namex):
@@ -150,24 +173,6 @@ def floating_dialogs(w):
         elif ('scord' in namex):
             w.floating=True
 
-
-
-
-
-gruvbox = {
-	"fg"	:["#fbf1c7","#ebdbb2","#d5c4a1","#bdae93","#a89984"],
-	"bg"	:["#282828","#3c3836","#504945","#665c54","#7c6f64","#1d2021","#32302f"],
-	"colors":{
-		"red"	:["#cc241d","#fb4934"],
-		"green"	:["#98971a","#b8bb26"],
-		"yellow":["#d79921","#fabd2f"],
-		"blue"	:["#458588","#83a598"],
-		"purple":["#b16286","#d3869b"],
-		"aqua"	:["#689d6a","#8ec07c"],
-		"grey"	:["#a89984","#928374"],
-		"orange":["#d65d0e","#fe8019"]
-	}
-}
 
 widget_defaults = dict(
     font='agave nerd font',
@@ -182,7 +187,7 @@ widget_defaults = dict(
 extension_defaults = widget_defaults.copy()
 screens = [
     Screen(
-        wallpaper='/home/josfemova/Pictures/wallpapers/pixel2.jpg',
+        wallpaper='/home/josfemova-rs/Images/Ferris1.png',
         wallpaper_mode='fill',
         bottom=bar.Bar(
             [
@@ -230,7 +235,7 @@ screens = [
             24,
         ),
     ),Screen(
-        wallpaper='/home/josfemova/Pictures/wallpapers/pixel2.jpg',
+        wallpaper='/home/josfemova-rs/Images/Ferris1.png',
         wallpaper_mode='fill',
         bottom=bar.Bar(
             [
@@ -318,12 +323,9 @@ focus_on_window_activation = "smart"
 # java that happens to be on java's whitelist.
 wmname = "LG3D"
 
-
-
-
 @hook.subscribe.startup_once
 def start_once():
 	processes = [
-		['setxkbmap', '-option', 'caps:escape'],['picom'],['yakuake']]
+		['setxkbmap', '-option', 'caps:escape'],['xhost',  '+'],['picom'],['yakuake']]
 	for p in processes:
 		subprocess.Popen(p)
